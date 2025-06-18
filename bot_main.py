@@ -1,22 +1,28 @@
-# ✅ Telegram Bot for Removing Vocals from Videos (5-Minute Chunks)
-# 🔒 Secure: Loads TOKEN from .env
-# ☁️ Ready for Render.com (no requirements.txt needed)
-# 📦 Auto-installs dependencies with --only-binary to avoid build errors
-
+# ✅ Telegram Bot with auto-dependency install + vocal remover (Render + .env secure)
 import subprocess, sys, os, shutil, uuid
 
 # === Auto-install required packages ===
-required = ['python-telegram-bot==13.15', 'moviepy', 'spleeter', 'ffmpeg-python', 'python-dotenv']
+required = [
+    'python-telegram-bot==13.15',
+    'moviepy',
+    'spleeter',
+    'ffmpeg-python',
+    'python-dotenv',
+    'tornado>=6.0,<6.2'  # explicitly pin version range to avoid incompatibility
+]
 for pkg in required:
     try:
         __import__(pkg.split('==')[0].replace('-', '_'))
     except ImportError:
-        subprocess.check_call([
-            sys.executable, "-m", "pip", "install", pkg,
-            "--only-binary", ":all:"
-        ])
+        if 'tornado' in pkg:
+            subprocess.check_call([sys.executable, '-m', 'pip', 'install', pkg])
+        else:
+            subprocess.check_call([
+                sys.executable, '-m', 'pip', 'install', pkg,
+                '--only-binary', ':all:'
+            ])
 
-# === Imports after installation ===
+# === Import after installation ===
 from telegram import Update
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 from moviepy.editor import VideoFileClip, AudioFileClip
@@ -24,10 +30,10 @@ from dotenv import load_dotenv
 
 # === Load secure environment variables ===
 load_dotenv()
-TOKEN = os.getenv("TOKEN")
+TOKEN = os.getenv('TOKEN')
 CHUNK_DURATION = 300  # 5 minutes
 
-# === Video processing function ===
+# === Video processing ===
 def process_video(input_path: str, session_dir: str) -> list:
     from subprocess import run
     os.makedirs(session_dir, exist_ok=True)
