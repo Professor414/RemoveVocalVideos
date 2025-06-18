@@ -1,26 +1,28 @@
-# ✅ Telegram Bot with auto-dependency install + vocal remover (Render + .env secure)
+# ✅ Telegram Bot for Removing Vocals (Render-compatible, no requirements.txt)
 import subprocess, sys, os, shutil, uuid
 
-# === Auto-install required packages ===
+# === Install tornado first without binary constraint ===
+try:
+    import tornado
+except ImportError:
+    subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'tornado>=6.0,<6.2'])
+
+# === Install remaining packages with --only-binary to avoid source build issues ===
 required = [
     'python-telegram-bot==13.15',
     'moviepy',
     'spleeter',
     'ffmpeg-python',
-    'python-dotenv',
-    'tornado>=6.0,<6.2'  # explicitly pin version range to avoid incompatibility
+    'python-dotenv'
 ]
 for pkg in required:
     try:
         __import__(pkg.split('==')[0].replace('-', '_'))
     except ImportError:
-        if 'tornado' in pkg:
-            subprocess.check_call([sys.executable, '-m', 'pip', 'install', pkg])
-        else:
-            subprocess.check_call([
-                sys.executable, '-m', 'pip', 'install', pkg,
-                '--only-binary', ':all:'
-            ])
+        subprocess.check_call([
+            sys.executable, '-m', 'pip', 'install', pkg,
+            '--only-binary', ':all:'
+        ])
 
 # === Import after installation ===
 from telegram import Update
