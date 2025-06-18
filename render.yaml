@@ -3,10 +3,10 @@ services:
     name: remove-vocal-bot
     runtime: python
     pythonVersion: 3.10.13
-    buildCommand: echo "skip build"
+    buildCommand: echo \"skip\"
     startCommand: python bot_main.py
     envVars:
       - key: TOKEN
         sync: false
       - key: PIP_NO_BUILD_ISOLATION
-        value: false     # ✅ បន្ថែមនេះ
+        value: false
