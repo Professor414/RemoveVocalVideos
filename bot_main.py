@@ -1,4 +1,8 @@
-# ✅ Start: Telegram Bot with auto-dependency install + vocal remover (Render + .env secure)
+# ✅ Telegram Bot for Removing Vocals from Videos (5-Minute Chunks)
+# 🔒 Secure: Loads TOKEN from .env
+# ☁️ Ready for Render.com (no requirements.txt needed)
+# 📦 Auto-installs dependencies with --only-binary to avoid build errors
+
 import subprocess, sys, os, shutil, uuid
 
 # === Auto-install required packages ===
@@ -7,9 +11,12 @@ for pkg in required:
     try:
         __import__(pkg.split('==')[0].replace('-', '_'))
     except ImportError:
-        subprocess.check_call([sys.executable, '-m', 'pip', 'install', pkg])
+        subprocess.check_call([
+            sys.executable, "-m", "pip", "install", pkg,
+            "--only-binary", ":all:"
+        ])
 
-# === Import after installation ===
+# === Imports after installation ===
 from telegram import Update
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 from moviepy.editor import VideoFileClip, AudioFileClip
@@ -17,10 +24,10 @@ from dotenv import load_dotenv
 
 # === Load secure environment variables ===
 load_dotenv()
-TOKEN = os.getenv('TOKEN')
+TOKEN = os.getenv("TOKEN")
 CHUNK_DURATION = 300  # 5 minutes
 
-# === Video processing ===
+# === Video processing function ===
 def process_video(input_path: str, session_dir: str) -> list:
     from subprocess import run
     os.makedirs(session_dir, exist_ok=True)
